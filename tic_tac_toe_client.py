@@ -22,8 +22,8 @@ top_frame = tk.Frame(window_main)
 
 # network client
 client = None
-HOST_ADDR = "0.0.0.0"
-HOST_PORT = 8080
+HOST_ADDR = "127.0.0.1"
+HOST_PORT = 8432
 
 list_labels = []
 num_cols = 3
@@ -103,7 +103,7 @@ def get_cordinate(xy):
             label["ticked"] = True
             label["symbol"] = your_details["symbol"]
             # send xy cordinate to server
-            client.send("$xy$" + str(xy[0]) + "$" + str(xy[1]))
+            client.send(("$xy$" + str(xy[0]) + "$" + str(xy[1])).encode())
             your_turn = False
 
             # Does this play leads to a win or a draw
@@ -262,7 +262,7 @@ def connect_to_server(name):
     try:
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client.connect((HOST_ADDR, HOST_PORT))
-        client.send(name)  # Send name to server after connecting
+        client.send(name.encode())  # Send name to server after connecting
         # start a thread to keep receiving message from server
         # do not block the main thread :)
         threading._start_new_thread(receive_message_from_server, (client, "m"))
@@ -277,7 +277,7 @@ def connect_to_server(name):
 def receive_message_from_server(sck, m):
     global your_details, opponent_details, your_turn, you_started
     while True:
-        from_server = sck.recv(4096)
+        from_server = sck.recv(4096).decode()
 
         if not from_server: break
 
