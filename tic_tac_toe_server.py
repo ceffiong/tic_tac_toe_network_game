@@ -37,8 +37,8 @@ clientFrame.pack(side=tk.BOTTOM, pady=(5, 10))
 
 
 server = None
-HOST_ADDR = "0.0.0.0"
-HOST_PORT = 8080
+HOST_ADDR = "127.0.0.1"
+HOST_PORT = 8432
 client_name = " "
 clients = []
 clients_names = []
@@ -52,8 +52,8 @@ def start_server():
     btnStop.config(state=tk.NORMAL)
 
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    print socket.AF_INET
-    print socket.SOCK_STREAM
+    print(socket.AF_INET)
+    print(socket.SOCK_STREAM)
 
     server.bind((HOST_ADDR, HOST_PORT))
     server.listen(5)  # server is listening for client connection
@@ -89,12 +89,12 @@ def send_receive_client_message(client_connection, client_ip_addr):
     client_msg = " "
 
     # send welcome message to client
-    client_name = client_connection.recv(4096)
+    client_name = client_connection.recv(4096).decode()
 
     if len(clients) < 2:
-        client_connection.send("welcome1")
+        client_connection.send("welcome1".encode())
     else:
-        client_connection.send("welcome2")
+        client_connection.send("welcome2".encode())
 
     clients_names.append(client_name)
     update_client_names_display(clients_names)  # update client names display
@@ -104,14 +104,14 @@ def send_receive_client_message(client_connection, client_ip_addr):
         symbols = ["O", "X"]
 
         # send opponent name and symbol
-        clients[0].send("opponent_name$" + clients_names[1] + "symbol" + symbols[0])
-        clients[1].send("opponent_name$" + clients_names[0] + "symbol" + symbols[1])
+        clients[0].send(("opponent_name$" + clients_names[1] + "symbol" + symbols[0]).encode())
+        clients[1].send(("opponent_name$" + clients_names[0] + "symbol" + symbols[1]).encode())
 
 
     while True:
 
         # get the player choice from received data
-        data = client_connection.recv(4096)
+        data = client_connection.recv(4096).decode()
         if not data: break
 
         # player x,y coordinate data. forward to the other player
@@ -119,10 +119,10 @@ def send_receive_client_message(client_connection, client_ip_addr):
             # is the message from client1 or client2?
             if client_connection == clients[0]:
                 # send the data from this player (client) to the other player (client)
-                clients[1].send(data)
+                clients[1].send(data.encode())
             else:
                 # send the data from this player (client) to the other player (client)
-                clients[0].send(data)
+                clients[0].send(data.encode())
 
     # find the client index then remove from both lists(client name list and connection list)
     idx = get_client_index(clients, client_connection)
